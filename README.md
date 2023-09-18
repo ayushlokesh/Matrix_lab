@@ -1,0 +1,1 @@
+Access the brief [here](https://online.manchester.ac.uk/webapps/blackboard/content/listContentEditable.jsp?content_id=_15031891_1&course_id=_78238_1).
