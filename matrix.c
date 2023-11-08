@@ -150,11 +150,20 @@ int matrix_transposition(matrix_t *m, matrix_t *result) {
 int matrix_product(matrix_t *m1, matrix_t *m2, matrix_t *result) {
     /* implement the function here ... */
     if((*m1).columns == (*m2).rows && matrix_allocate(result, (*m1).rows, (*m2).columns) == 0){
+        matrix_init_zeros(result);
         for(int i = 0; i < (*m1).rows; i++){
         for(int j = 0; j < (*m2).columns; j++){
-            for(int k = 0; k < (*m2).rows; k++)
-            (*result).content[i][j] += (*m1).content[i][k] * (*m2).content[k][j];
-        } } return 0;
+            for(int k = 0; k < (*m2).rows; k++){
+            // printf("(*result).content[%d][%d]->(%d) += (*m1).content[%d][%d]->(%d) * (*m2).content[%d][%d]->(%d)\n",
+            // i,j,(*result).content[i][j],i,k,(*m1).content[i][k] ,k,j, (*m2).content[k][j]);
+            (*result).content[i][j] += (*m1).content[i][k] * (*m2).content[k][j];}
+        } }
+        // printf("printing result");
+        // for(int i = 0; i < (*result).rows; i++){
+        // for(int j = 0; j < (*result).columns; j++){printf("%d ", (*result).content[i][j]);}
+        // printf("\n");}
+         
+        return 0;
     }
     return -1;
     // return -ENOSYS;
@@ -181,6 +190,85 @@ int matrix_dump_file(matrix_t *m, char *output_file) {
 
 int matrix_allocate_and_init_file(matrix_t *m, char *input_file) {
     /* implement the function here ... */
-    
-    return -ENOSYS;
+FILE *fptr = fopen(input_file,"r");
+     char c; int b = 1;
+     if(fptr == NULL){
+        return -1;
+     }
+    while(1){
+       c = fgetc(fptr);
+       if(c == '-'){
+         c = fgetc(fptr);
+         if(!(c >= '0' && c<='9')) {
+            b = 0; printf("break\n");break;}}
+       if(c == EOF){
+        b = 1; break;}
+    if((c != ' ' && c != '\n' && (c < '0' || c> '9') ) ){b = 0; break;}
+    }
+    fclose(fptr);
+    //check b == 0? return -1;
+    if(!b){return -1;}
+    fptr = fopen(input_file,"r");
+    int read_char = 0, cols = 0;
+
+    c = fgetc(fptr);
+     int read_line = 0;
+     while (c == '\n'){c = fgetc(fptr);};
+    while(b){
+    //    printf("c = %c, cond = %d", c,(read_char == 0 && (c >= '0' && c <= '9')) );
+        if(read_char == 0 && ((c >= '0' && c <= '9')||c == '-')){
+            read_char = 1; cols++; read_line = 1;
+           
+        }
+        else if(read_char == 1 && (c < '0' || c > '9')){
+            read_char = 0;
+        }
+        c = fgetc(fptr);
+        if(!(b && c != '\n' && read_line == 1)){break;}
+    }
+    // printf("cols = %d\n", cols); b = cols > 0;
+    fclose(fptr);
+    //check b == 0? return -1;
+    if(!b){return -1;}
+    fptr = fopen(input_file,"r");
+    read_line = 0; read_char = 0;
+    int count = 0, rows = 0;
+    c = fgetc(fptr);
+     while(b && c != EOF){
+        // printf("c = '%c'\n",c);
+        // printf("cond_1 = %d\n", c == '\n' && read_line == 1);
+        if(c == '\n' && read_line == 1 ){
+            // printf("count = %d",count);
+            if(count != cols){
+                printf("wrong format\n");
+                 b = 0; rows = 0; break;}
+             rows++; read_char = 0; read_line = 0; count = 0;
+            }
+        if(read_char == 0 && ((c >= '0' && c <= '9')||c == '-')){
+            read_char = 1; read_line = 1; count++;
+        }
+        else if(read_char == 1 && (c < '0' || c > '9')){
+            read_char = 0;
+        }
+        c = fgetc(fptr);
+     }b = rows > 0;
+    //  printf("rows = %d\n", rows);
+    fclose(fptr);
+    //check b == 0? return -1;
+    if(!b){return -1;}
+    matrix_allocate(m,rows,cols);
+    fptr = fopen(input_file,"r");
+    if(b){for(int i = 0; i < rows; i++){
+        for(int j = 0; j < cols; j++){
+          fscanf(fptr, "%d", &((*m).content[i][j]));
+        }
+    }}
+    fclose(fptr);
+
+    // for(int i = 0; i < rows; i++){
+    //     for(int j = 0; j < cols; j++){printf("%d ", (*m).content[i][j]);}
+    //     printf("\n");}
+        
+    return 0;
+    // return -ENOSYS;
 }
