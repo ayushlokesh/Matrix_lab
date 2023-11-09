@@ -2,20 +2,13 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdio.h>
+#include <limits.h>
 #include <errno.h> /* for ENOSYS */
-
-void print(matrix_t *m){
-    for (int i = 0; i < (*m).rows; i++) {
-        for (int j = 0; j < (*m).columns; j++) {
-            printf( "%d ", (*m).content[i][j]);
-        }
-        printf( "\n");
-} printf("\ndone!\n");
-}
 
 int matrix_allocate(matrix_t *m, int rows, int columns) {
     /* implement the function here ... */
     /* implement the function here ... */
+    if(rows <= 0 || columns <= 0){return -1;}
     (*m).columns = columns;
     (*m).rows = rows;
 
@@ -62,6 +55,7 @@ void matrix_init_zeros(matrix_t *m) {
 
 int matrix_init_identity(matrix_t *m){
     /* implement the function here ... */
+    if((*m).rows != (*m).columns){return -1;}
      int size = (*m).rows;
      if(size > (*m).columns){size = (*m).columns;}
         matrix_init_zeros(m);
@@ -111,6 +105,9 @@ int matrix_sum(matrix_t *m1, matrix_t *m2, matrix_t *result) {
     matrix_allocate(result, (*m1).rows, (*m1).columns) == 0){
         for(int i = 0; i < (*m1).rows; i++){
         for(int j = 0; j < (*m1).columns; j++){
+            if (((*m1).content[i][j] > 0 && (*m2).content[i][j] > INT_MAX - (*m1).content[i][j]) ||
+             ((*m1).content[i][j] < 0 && (*m2).content[i][j] < INT_MIN - (*m1).content[i][j])) 
+            {return -1;}
             (*result).content[i][j] = (*m1).content[i][j] + (*m2).content[i][j];
         } }
          return 0;}
@@ -155,7 +152,8 @@ int matrix_product(matrix_t *m1, matrix_t *m2, matrix_t *result) {
         for(int j = 0; j < (*m2).columns; j++){
             for(int k = 0; k < (*m2).rows; k++){
             // printf("(*result).content[%d][%d]->(%d) += (*m1).content[%d][%d]->(%d) * (*m2).content[%d][%d]->(%d)\n",
-            // i,j,(*result).content[i][j],i,k,(*m1).content[i][k] ,k,j, (*m2).content[k][j]);
+            // i,j,(*result).content[i][j],i,k,(*m1).content[i][k] ,k,j, (*m2).content[k][j])
+           
             (*result).content[i][j] += (*m1).content[i][k] * (*m2).content[k][j];}
         } }
         // printf("printing result");
@@ -251,6 +249,7 @@ FILE *fptr = fopen(input_file,"r");
             read_char = 0;
         }
         c = fgetc(fptr);
+        if(c == EOF && count == cols ){rows++;}
      }b = rows > 0;
     //  printf("rows = %d\n", rows);
     fclose(fptr);
